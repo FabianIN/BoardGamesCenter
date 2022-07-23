@@ -7,6 +7,7 @@ namespace BoardGamesCenter.Entities
         [Key]
 
         public Guid ID { get; set; }
+
         [Required]
         [MaxLength(150)]
         public string FirstName { get; set; }
