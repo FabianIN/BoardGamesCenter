@@ -1,4 +1,6 @@
 ﻿using BoardGamesCenter.Contexts;
+using BoardGamesCenter.Services.Repositories;
+using BoardGamesCenter.Services.UnitsOfWork;
 using Microsoft.EntityFrameworkCore;
 
 namespace BoardGamesCenter
@@ -17,18 +19,34 @@ namespace BoardGamesCenter
             var connectionString = builder.Configuration["ConnectionStrings:GamesDbConnectionString"];
             builder.Services.AddDbContext<GamesContext>(o => o.UseSqlServer(connectionString));
             builder.Services.AddControllers();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+            builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
+
+            builder.Services.AddScoped<IUserUnitOfWork, UserUnitOfWork>();
+            builder.Services.AddScoped<IGameUnitOfWork, GameUnitOfWork>();
+
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
-        public static void Configure(WebApplication app)
+        public static void Configure(WebApplication app, IWebHostEnvironment env)
         {
-            if (app.Environment.IsDevelopment())
+            if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
-            app.MapControllers();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            //app.UseHttpsRedirection();
+            //app.UseAuthorization();
+            //app.MapControllers();
         }
 
     }
