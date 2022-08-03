@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BoardGamesCenter.Entities;
 using BoardGamesCenter.ExternalModels;
 using BoardGamesCenter.Services.UnitsOfWork;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,7 @@ namespace BoardGamesCenter.Controllers
 
         [HttpGet]
         [Route("details/{id}", Name = "GetGameDetails")]
-        public IActionResult GetGameDetails()
+        public IActionResult GetGameDetails(Guid id)
         {
             var gameEntity = _gameUnit.Games.GetGameDetails(id);
             if(gameEntity == null)
@@ -61,7 +62,7 @@ namespace BoardGamesCenter.Controllers
         [HttpGet]
         public IActionResult AddGame([FromBody] GameDTO game)
         {
-            var gameEntity = _mapper.Map<GameDTO>(game);
+            var gameEntity = _mapper.Map<Game>(game);
             _gameUnit.Games.Add(gameEntity);
             _gameUnit.Complete();
             _gameUnit.Games.Get(gameEntity.Id);

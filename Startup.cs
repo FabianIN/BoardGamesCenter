@@ -30,12 +30,12 @@ namespace BoardGamesCenter
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
-        public static void Configure(WebApplication app, IWebHostEnvironment env)
+        public static void Configure(WebApplication app)//, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (app.Environment.IsDevelopment())
             {
-                //app.UseSwagger();
-                //app.UseSwaggerUI();
+                app.UseSwagger();
+                app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
             app.UseRouting();
@@ -44,9 +44,9 @@ namespace BoardGamesCenter
                 endpoints.MapControllers();
             });
 
-            //app.UseHttpsRedirection();
-            //app.UseAuthorization();
-            //app.MapControllers();
+           app.UseHttpsRedirection();
+            app.UseAuthorization();
+            app.MapControllers();
         }
 
     }
