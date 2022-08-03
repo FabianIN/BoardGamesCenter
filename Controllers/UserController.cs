@@ -25,7 +25,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         [HttpGet, Authorize]
-        [Route("{id}", Name = "GetUser")]
+        [Route("Display_User", Name = "GetUser")]
         public IActionResult GetUser(Guid id)
         {
             var userEntity = _userUnit.Users.Get(id);
@@ -37,7 +37,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         [HttpGet, Authorize]
-        [Route("", Name = "GetAllUser")]
+        [Route("Display_All_Users", Name = "GetAllUser")]
         public IActionResult GetAllUser()
         {
             var userEntities = _userUnit.Users.Find(u => u.Deleted == false || u.Deleted == null);
@@ -48,8 +48,27 @@ namespace BoardGamesCenter.Controllers
             return Ok(_mapper.Map<List<UserDTO>>(userEntities));
         }
 
-        [Route("register", Name = "Register a new account")]
-        [HttpPost, Authorize]
+        [HttpGet, Authorize]
+        [Route("Search_Users_By_Name", Name = "GetAllUsersByName")]
+        public IActionResult GetAllUsersByName(string name)
+        {
+            var userEntities = _userUnit.Users.Find(a => a.Deleted == false || a.Deleted == null);
+            var userName = _userUnit.Users.Find(a => a.FirstName == name);
+            if (userEntities == null)
+            {
+                return NotFound();
+            }
+
+            if (userName == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<List<UserDTO>>(userName));
+        }
+
+        [Route("Sign_Up", Name = "Register a new account")]
+        [HttpPost]
         public IActionResult Register([FromBody] UserDTO user)
         {
             var userEntity = _mapper.Map<User>(user);
@@ -64,28 +83,8 @@ namespace BoardGamesCenter.Controllers
                 _mapper.Map<UserDTO>(userEntity));
         }
 
-        //[Route("login")]
-        //[HttpPost]
-        //public IActionResult Login([FromBody] LoginDTO user)
-        //{
-        //    if (user == null)
-        //    {
-        //        return BadRequest("Invalid client request.");
-        //    }
 
-        //    var foundUser = _userUnit.Users.FindDefault(u => u.Email.Equals(user.Email) && u.Password.Equals(user.Password) && (u.Deleted == false || u.Deleted == null));
-
-        //    if (foundUser != null)
-        //    {
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        return Unauthorized();
-        //    }
-        //}
-
-        [Route("login")]
+        [Route("Sign_In")]
         [HttpPost]
 
         public IActionResult Login([FromBody] LoginDTO user)
@@ -99,7 +98,7 @@ namespace BoardGamesCenter.Controllers
 
             if (foundUsers.Count() == 1)
             {
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("parolamea1234"));
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("this is my custom Secret key for authentication"));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
                 var tokeOptions = new JwtSecurityToken(
@@ -118,6 +117,22 @@ namespace BoardGamesCenter.Controllers
             {
                 return Unauthorized();
             }
+        }
+
+        [Route("Remove_User", Name = "Remove an existing user")]
+        [HttpDelete, Authorize]
+        public IActionResult RemoveGame(Guid id)
+        {
+            var userEntity = _userUnit.Users.Get(id);
+            if (userEntity == null)
+            {
+                return NotFound();
+            }
+
+            userEntity.Deleted = true;
+            _userUnit.Users.Remove(userEntity);
+            _userUnit.Complete();
+            return Ok(userEntity.FirstName + " was deleted.");
         }
     }
 }

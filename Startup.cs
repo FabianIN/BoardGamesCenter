@@ -35,7 +35,7 @@ namespace BoardGamesCenter
 
                     ValidIssuer = "https://localhost:7049",
                     ValidAudience = "https://localhost:7049",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("parolamea1234"))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("this is my custom Secret key for authentication"))
                 };
             });
 
@@ -53,7 +53,7 @@ namespace BoardGamesCenter
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
-        public static void Configure(WebApplication app)//, IWebHostEnvironment env)
+        public static void Configure(WebApplication app)
         {
             if (app.Environment.IsDevelopment())
             {
@@ -61,15 +61,21 @@ namespace BoardGamesCenter
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseAuthorization();
+
+
+
             app.MapControllers();
         }
 

@@ -18,6 +18,7 @@ namespace BoardGamesCenter.Services.Repositories
             return _context.Games
                 .Where(b => b.Id == gameId && (b.Deleted == false || b.Deleted == null))
                 .Include(b => b.Author)
+                .Include(b => b.Publisher)
                 .FirstOrDefault();
         }
     }   

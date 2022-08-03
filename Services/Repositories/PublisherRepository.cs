@@ -11,5 +11,6 @@ namespace BoardGamesCenter.Services.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
+
     }
 }

@@ -51,7 +51,7 @@ namespace BoardGamesCenter.Services.Repositories
 
     public TEntity Get(Guid id)
     {
-            return _context.Set<TEntity>().Find();
+            return _context.Set<TEntity>().Find(id);
     }
 
     public TEntity Remove(TEntity entity)

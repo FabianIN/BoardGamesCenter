@@ -2,7 +2,7 @@
 {
     public class AuthorDTO
     {
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
 
         public string FirstName { get; set; }
 

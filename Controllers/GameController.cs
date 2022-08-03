@@ -22,7 +22,7 @@ namespace BoardGamesCenter.Controllers
 
         #region Games
         [HttpGet, Authorize]
-        [Route("{id}", Name = "GetGame")]
+        [Route("Display_Game", Name = "GetGame")]
         public IActionResult GetGame (Guid id)
         {
             var gameEntity = _gameUnit.Games.Get(id);
@@ -35,7 +35,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         [HttpGet, Authorize]
-        [Route("", Name = "GetAllGames")]
+        [Route("Display_All_Games", Name = "GetAllGames")]
         public IActionResult GetAllGames()
         {
             var gamesEntities = _gameUnit.Games.Find(a => a.Deleted == false || a.Deleted == null);
@@ -47,7 +47,26 @@ namespace BoardGamesCenter.Controllers
         }
 
         [HttpGet, Authorize]
-        [Route("details/{id}", Name = "GetGameDetails")]
+        [Route("Search_Games_By_Description", Name = "GetAllGamesByDescription")]
+        public IActionResult GetAllGamesByDescription(string descriprion)
+        {
+            var gamesEntities = _gameUnit.Games.Find(a => a.Deleted == false || a.Deleted == null);
+            var gameDescriprion = _gameUnit.Games.Find(a => a.Description == descriprion);
+            if (gamesEntities == null)
+            {
+                return NotFound();
+            }
+
+            if (gameDescriprion == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<List<GameDTO>>(gameDescriprion));
+        }
+
+        [HttpGet, Authorize]
+        [Route("Display_Game_Details", Name = "GetGameDetails")]
         public IActionResult GetGameDetails(Guid id)
         {
             var gameEntity = _gameUnit.Games.GetGameDetails(id);
@@ -59,8 +78,8 @@ namespace BoardGamesCenter.Controllers
             return Ok(_mapper.Map<GameDTO>(gameEntity));
         }
 
-        [Route("add", Name = "Add a new game")]
-        [HttpGet, Authorize]
+        [Route("Add_Game", Name = "Add a new game")]
+        [HttpPost, Authorize]
         public IActionResult AddGame([FromBody] GameDTO game)
         {
             var gameEntity = _mapper.Map<Game>(game);
@@ -73,6 +92,21 @@ namespace BoardGamesCenter.Controllers
                 _mapper.Map<GameDTO>(gameEntity));
         }
 
+        [Route("Remove_Game", Name = "Remove an existing game")]
+        [HttpDelete, Authorize]
+        public IActionResult RemoveGame(Guid id)
+        {
+            var gameEntity = _gameUnit.Games.GetGameDetails(id);
+            if (gameEntity == null)
+            {
+                return NotFound();
+            }
+
+            gameEntity.Deleted = true;
+            _gameUnit.Games.Remove(gameEntity);
+            _gameUnit.Complete();
+            return Ok(gameEntity.Title +" game was deleted.");
+        }
         #endregion Games
     }
 }
