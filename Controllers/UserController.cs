@@ -2,7 +2,12 @@
 using BoardGamesCenter.Entities;
 using BoardGamesCenter.ExternalModels;
 using BoardGamesCenter.Services.UnitsOfWork;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace BoardGamesCenter.Controllers
 {
@@ -19,7 +24,7 @@ namespace BoardGamesCenter.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        [HttpGet]
+        [HttpGet, Authorize]
         [Route("{id}", Name = "GetUser")]
         public IActionResult GetUser(Guid id)
         {
@@ -31,7 +36,7 @@ namespace BoardGamesCenter.Controllers
             return Ok(_mapper.Map<UserDTO>(userEntity));
         }
 
-        [HttpGet]
+        [HttpGet, Authorize]
         [Route("", Name = "GetAllUser")]
         public IActionResult GetAllUser()
         {
@@ -44,7 +49,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         [Route("register", Name = "Register a new account")]
-        [HttpPost]
+        [HttpPost, Authorize]
         public IActionResult Register([FromBody] UserDTO user)
         {
             var userEntity = _mapper.Map<User>(user);
@@ -59,8 +64,30 @@ namespace BoardGamesCenter.Controllers
                 _mapper.Map<UserDTO>(userEntity));
         }
 
+        //[Route("login")]
+        //[HttpPost]
+        //public IActionResult Login([FromBody] LoginDTO user)
+        //{
+        //    if (user == null)
+        //    {
+        //        return BadRequest("Invalid client request.");
+        //    }
+
+        //    var foundUser = _userUnit.Users.FindDefault(u => u.Email.Equals(user.Email) && u.Password.Equals(user.Password) && (u.Deleted == false || u.Deleted == null));
+
+        //    if (foundUser != null)
+        //    {
+        //        return Ok();
+        //    }
+        //    else
+        //    {
+        //        return Unauthorized();
+        //    }
+        //}
+
         [Route("login")]
         [HttpPost]
+
         public IActionResult Login([FromBody] LoginDTO user)
         {
             if (user == null)
@@ -68,17 +95,29 @@ namespace BoardGamesCenter.Controllers
                 return BadRequest("Invalid client request.");
             }
 
-            var foundUser = _userUnit.Users.FindDefault(u => u.Email.Equals(user.Email) && u.Password.Equals(user.Password) && (u.Deleted == false || u.Deleted == null));
+            var foundUsers = _userUnit.Users.Find(u => u.Email.Equals(user.Email) && u.Password.Equals(user.Password) && (u.Deleted == false || u.Deleted == null));
 
-            if (foundUser != null)
+            if (foundUsers.Count() == 1)
             {
-                return Ok();
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("parolamea1234"));
+                var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+                var tokeOptions = new JwtSecurityToken(
+                    issuer: "https://localhost:7049",
+                    audience: "https://localhost:7049",
+                    claims: new List<Claim>(),
+                    expires: DateTime.Now.AddHours(1),
+                    signingCredentials: signinCredentials
+                    );
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+                return Ok(new { Token = tokenString });
+
             }
+
             else
             {
                 return Unauthorized();
             }
         }
-
     }
 }

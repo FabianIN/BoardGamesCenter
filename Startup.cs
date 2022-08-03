@@ -1,7 +1,10 @@
 ﻿using BoardGamesCenter.Contexts;
 using BoardGamesCenter.Services.Repositories;
 using BoardGamesCenter.Services.UnitsOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BoardGamesCenter
 {
@@ -16,6 +19,26 @@ namespace BoardGamesCenter
 
         public static void ConfigureServices(WebApplicationBuilder builder)
         {
+            builder.Services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = "https://localhost:7049",
+                    ValidAudience = "https://localhost:7049",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("parolamea1234"))
+                };
+            });
+
             var connectionString = builder.Configuration["ConnectionStrings:GamesDbConnectionString"];
             builder.Services.AddDbContext<GamesContext>(o => o.UseSqlServer(connectionString));
             builder.Services.AddControllers();
@@ -44,7 +67,8 @@ namespace BoardGamesCenter
                 endpoints.MapControllers();
             });
 
-           app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
         }

@@ -2,6 +2,7 @@
 using BoardGamesCenter.Entities;
 using BoardGamesCenter.ExternalModels;
 using BoardGamesCenter.Services.UnitsOfWork;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGamesCenter.Controllers
@@ -20,7 +21,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         #region Games
-        [HttpGet]
+        [HttpGet, Authorize]
         [Route("{id}", Name = "GetGame")]
         public IActionResult GetGame (Guid id)
         {
@@ -33,7 +34,7 @@ namespace BoardGamesCenter.Controllers
             return Ok(_mapper.Map<GameDTO>(gameEntity));
         }
 
-        [HttpGet]
+        [HttpGet, Authorize]
         [Route("", Name = "GetAllGames")]
         public IActionResult GetAllGames()
         {
@@ -45,7 +46,7 @@ namespace BoardGamesCenter.Controllers
             return Ok(_mapper.Map<List<GameDTO>>(gamesEntities));
         }
 
-        [HttpGet]
+        [HttpGet, Authorize]
         [Route("details/{id}", Name = "GetGameDetails")]
         public IActionResult GetGameDetails(Guid id)
         {
@@ -59,7 +60,7 @@ namespace BoardGamesCenter.Controllers
         }
 
         [Route("add", Name = "Add a new game")]
-        [HttpGet]
+        [HttpGet, Authorize]
         public IActionResult AddGame([FromBody] GameDTO game)
         {
             var gameEntity = _mapper.Map<Game>(game);
